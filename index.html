@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI App Deployer — Deploy AI Apps to Netlify (No JS)</title>
+    <meta name="description" content="Deploy AI apps to Netlify with a fast, accessible, CSS-only front‑end. No JavaScript required.">
+    <link rel="canonical" href="https://your-site.netlify.app/">
+    <meta property="og:title" content="AI App Deployer — No JS Needed">
+    <meta property="og:description" content="A polished, CSS-only front-end for deploying AI apps to Netlify.">
+    <meta property="og:type" content="website">
+    <meta name="theme-color" content="#2d5bff">
+    <style>
+        /* CSS Variables for Theming */
+        :root {
+            /* HSL Colors */
+            --brand: 230, 100%, 56%;
+            --brand-strong: 230, 80%, 48%;
+            --bg: 220, 20%, 99%;
+            --surface: 220, 33%, 98%;
+            --surface-2: 220, 24%, 94%;
+            --text: 224, 32%, 20%;
+            --text-weak: 224, 14%, 40%;
+            --text-strong: 224, 42%, 14%;
+            --border: 220, 14%, 88%;
+            --ring: 230, 100%, 56%;
+            --success: 142, 76%, 36%;
+            --error: 0, 72%, 51%;
+            
+            /* Spacing & Sizing */
+            --radius: 14px;
+            --shadow: 0 10px 30px hsl(230 60% 40% / .15);
+            --shadow-sm: 0 4px 12px hsl(230 60% 40% / .08);
+            --transition: 0.2s ease;
+            
+            /* Typography */
+            --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial, sans-serif;
+            --font-heading: var(--font);
+            --text-base: 1rem;
+            --text-lg: 1.125rem;
+            --text-xl: 1.25rem;
+            --text-2xl: 1.5rem;
+            --text-3xl: 1.875rem;
+            --text-4xl: 2.25rem;
+            --text-5xl: 3rem;
+        }
+
+        /* Base Styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: 80px;
+        }
+
+        body {
+            margin: 0;
+            font-family: var(--font);
+            color: hsl(var(--text));
+            background: hsl(var(--bg));
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: var(--font-heading);
+            font-weight: 700;
+            line-height: 1.2;
+            color: hsl(var(--text-strong));
+        }
+
+        p {
+            margin: 0 0 1rem;
+        }
+
+        ul {
+            padding: 0;
+            margin: 0 0 1.5rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        img, svg {
+            max-width: 100%;
+            display: block;
+        }
+
+        .container {
+            max-width: 1120px;
+            margin-inline: auto;
+            padding-inline: 1.5rem;
+        }
+
+        .section {
+            padding: 5rem 0;
+        }
+
+        .section-title {
+            font-size: clamp(var(--text-2xl), 1.2rem + 1.5vw, var(--text-4xl));
+            margin: 0 0 2rem;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: "";
+            display: block;
+            width: 60px;
+            height: 4px;
+            background: hsl(var(--brand));
+            border-radius: 2px;
+            margin-top: 0.75rem;
+        }
+
+        .visually-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* Skip Link */
+        .skip-link {
+            position: absolute;
+            left: 1rem;
+            top: -40px;
+            background: hsl(var(--brand));
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius);
+            transition: top 0.3s ease;
+            z-index: 100;
+            font-weight: 600;
+        }
+
+        .skip-link:focus {
+            top: 1rem;
+        }
+
+        /* Header */
+        .site-header {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: hsla(var(--bg), 0.9);
+            border-bottom: 1px solid hsl(var(--border));
+            backdrop-filter: saturate(140%) blur(8px);
+            -webkit-backdrop-filter: saturate(140%) blur(8px);
+            box-shadow: 0 2px 10px hsla(0, 0%, 0%, 0.05);
+        }
+
+        .header-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.5rem;
+            height: 80px;
+        }
+
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: hsl(var(--text-strong));
+            text-decoration: none;
+            font-weight: 700;
+            font-size: var(--text-xl);
+        }
+
+        .brand-mark {
+            flex: 0 0 auto;
+            transition: transform 0.3s ease;
+        }
+
+        .brand:hover .brand-mark {
+            transform: rotate(10deg);
+        }
+
+        /* Navigation */
+        .nav-toggle {
+            display: none;
+        }
+
+        .hamburger {
+            display: inline-flex;
+            flex-direction: column;
+            gap: 6px;
+            cursor: pointer;
+            padding: 0.75rem;
+            border-radius: var(--radius);
+            background: transparent;
+            border: none;
+        }
+
+        .hamburger:focus-visible {
+            outline: 3px solid hsl(var(--ring));
+        }
+
+        .hamburger span {
+            width: 28px;
+            height: 3px;
+            background: hsl(var(--text));
+            display: block;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            border-radius: 2px;
+        }
+
+        .site-nav {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .site-nav ul {
+            list-style: none;
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .site-nav a {
+            text-decoration: none;
+            color: hsl(var(--text));
+            font-weight: 600;
+            font-size: var(--text-base);
+            position: relative;
+            padding: 0.5rem 0;
+            transition: color 0.2s ease;
+        }
+
+        .site-nav a::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: hsl(var(--brand));
+            transition: width 0.3s ease;
+        }
+
+        .site-nav a:hover,
+        .site-nav a:focus {
+            color: hsl(var(--brand-strong));
+        }
+
+        .site-nav a:hover::after,
+        .site-nav a:focus::after {
+            width: 100%;
+        }
+
+        .site-nav a:focus-visible {
+            outline: none;
+        }
+
+        .header-ctas {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        /* Mobile menu */
+        @media (max-width: 900px) {
+            .site-nav {
+                position: fixed;
+                inset: 80px 0 auto 0;
+                background: hsl(var(--bg));
+                border-bottom: 1px solid hsl(var(--border));
+                padding: 1.5rem;
+                display: grid;
+                gap: 1.5rem;
+                grid-template-columns: 1fr;
+                transform: translateY(-120%);
+                transition: transform 0.3s ease-out;
+                box-shadow: 0 10px 20px hsla(0, 0%, 0%, 0.05);
+            }
+            
+            .site-nav ul {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .hamburger {
+                display: inline-flex;
+                z-index: 60;
+            }
+            
+            .nav-toggle:checked ~ .hamburger span:nth-child(1) {
+                transform: translateY(8px) rotate(45deg);
+            }
+            
+            .nav-toggle:checked ~ .hamburger span:nth-child(2) {
+                opacity: 0;
+            }
+            
+            .nav-toggle:checked ~ .hamburger span:nth-child(3) {
+                transform: translateY(-8px) rotate(-45deg);
+            }
+            
+            .nav-toggle:checked ~ .site-nav {
+                transform: translateY(0);
+            }
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.875rem 1.25rem;
+            border-radius: var(--radius);
+            border: 1px solid transparent;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: var(--text-base);
+            transition: all var(--transition);
+            cursor: pointer;
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        .btn-primary {
+            background: hsl(var(--brand));
+            color: white;
+            box-shadow: var(--shadow);
+        }
+
+        .btn-primary:hover {
+            background: hsl(var(--brand-strong));
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px hsl(230 60% 40% / 0.2);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: hsl(var(--text-strong));
+            border-color: hsl(var(--border));
+        }
+
+        .btn-outline:hover {
+            border-color: hsl(var(--brand));
+            color: hsl(var(--brand-strong));
+            background: hsla(var(--brand), 0.05);
+        }
+
+        .btn-subtle {
+            background: hsl(var(--surface));
+            color: hsl(var(--text));
+            border-color: hsl(var(--border));
+            border-style: solid;
+        }
+
+        .btn-subtle:hover {
+            border-color: hsl(var(--brand));
+            background: hsla(var(--brand), 0.05);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 6rem 0 4rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: "";
+            position: absolute;
+            top: -200px;
+            right: -200px;
+            width: 600px;
+            height: 600px;
+            background: linear-gradient(135deg, hsl(var(--brand), 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            z-index: -1;
+        }
+
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            align-items: center;
+            gap: 3rem;
+        }
+
+        .hero-copy h1 {
+            font-size: clamp(var(--text-3xl), 1.2rem + 2.4vw, var(--text-5xl));
+            line-height: 1.15;
+            margin: 0 0 1.5rem;
+        }
+
+        .lead {
+            color: hsl(var(--text-weak));
+            max-width: 48ch;
+            font-size: var(--text-lg);
+            margin-bottom: 1.5rem;
+        }
+
+        .hero .actions {
+            margin-top: 2rem;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .hero-visual {
+            position: relative;
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            background: white;
+            border: 1px solid hsl(var(--border));
+        }
+
+        .hero-svg {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        @media (max-width: 900px) {
+            .hero-grid {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+            }
+            
+            .hero::before {
+                top: -100px;
+                right: -100px;
+                width: 400px;
+                height: 400px;
+            }
+        }
+
+        /* Features */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+
+        .feature {
+            padding: 1.75rem;
+            border: 1px solid hsl(var(--border));
+            border-radius: var(--radius);
+            background: white;
+            box-shadow: var(--shadow-sm);
+            transition: all var(--transition);
+        }
+
+        .feature:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow);
+        }
+
+        .feature h3 {
+            margin-top: 0;
+            font-size: var(--text-xl);
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .feature h3::before {
+            content: "";
+            display: block;
+            width: 8px;
+            height: 8px;
+            background: hsl(var(--brand));
+            border-radius: 50%;
+        }
+
+        @media (max-width: 900px) {
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Demo Section */
+        .demo-panel {
+            border: 1px solid hsl(var(--border));
+            background: white;
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .step-select {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .step-select input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .step-select label {
+            text-align: center;
+            padding: 1rem;
+            border: 1px solid hsl(var(--border));
+            border-radius: var(--radius);
+            cursor: pointer;
+            background: hsl(var(--surface));
+            font-weight: 600;
+            transition: all var(--transition);
+        }
+
+        .step-select label:hover {
+            border-color: hsl(var(--brand));
+            background: hsla(var(--brand), 0.05);
+        }
+
+        #step-1:checked + label,
+        #step-2:checked + label,
+        #step-3:checked + label {
+            background: hsla(var(--brand), 0.1);
+            border-color: hsl(var(--brand));
+            color: hsl(var(--brand-strong));
+        }
+
+        .progress {
+            position: relative;
+            height: 8px;
+            background: hsl(var(--surface-2));
+            border-radius: 99px;
+            overflow: hidden;
+            margin-bottom: 1.25rem;
+        }
+
+        .progress .bar {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 0;
+            background: hsl(var(--brand));
+            transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        #step-1:checked ~ .progress .bar[data-step="1"] {
+            width: 33.33%;
+        }
+
+        #step-2:checked ~ .progress .bar[data-step="2"] {
+            width: 66.66%;
+        }
+
+        #step-3:checked ~ .progress .bar[data-step="3"] {
+            width: 100%;
+        }
+
+        .panes {
+            border: 1px dashed hsl(var(--border));
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            background: hsl(var(--surface));
+            min-height: 140px;
+        }
+
+        .pane {
+            display: none;
+        }
+
+        #step-1:checked ~ .panes .pane-1,
+        #step-2:checked ~ .panes .pane-2,
+        #step-3:checked ~ .panes .pane-3 {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Pricing */
+        .pricing-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .billing-toggle {
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .toggle-label {
+            display: inline-grid;
+            grid-auto-flow: column;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .toggle-label .switch {
+            width: 48px;
+            height: 28px;
+            background: hsl(var(--surface));
+            border: 1px solid hsl(var(--border));
+            border-radius: 999px;
+            position: relative;
+            transition: all var(--transition);
+        }
+
+        .toggle-label .switch::after {
+            content: "";
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: hsl(var(--brand));
+            top: 3px;
+            left: 4px;
+            transition: transform 0.3s ease;
+        }
+
+        #billing:checked + .toggle-label .switch::after {
+            transform: translateX(20px);
+        }
+
+        .toggle-label .save {
+            color: hsl(var(--brand-strong));
+            font-weight: 600;
+        }
+
+        .plans {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+
+        .card {
+            border: 1px solid hsl(var(--border));
+            background: white;
+            border-radius: var(--radius);
+            padding: 2rem;
+            box-shadow: var(--shadow-sm);
+            display: grid;
+            align-content: start;
+            gap: 1rem;
+            transition: all var(--transition);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow);
+        }
+
+        .card-featured {
+            border-color: hsl(var(--brand));
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-featured::before {
+            content: "Recommended";
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: hsl(var(--brand));
+            color: white;
+            padding: 0.5rem 1.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            transform: translate(25%, -50%) rotate(45deg);
+            transform-origin: bottom right;
+            width: 140px;
+            text-align: center;
+        }
+
+        .price {
+            font-size: var(--text-4xl);
+            font-weight: 800;
+            display: flex;
+            align-items: baseline;
+            gap: 0.25rem;
+            color: hsl(var(--text-strong));
+        }
+
+        .price .cycle {
+            font-size: var(--text-base);
+            font-weight: 500;
+            color: hsl(var(--text-weak));
+        }
+
+        .price .yearly {
+            display: none;
+        }
+
+        #billing:checked ~ .plans .price .monthly {
+            display: none;
+        }
+
+        #billing:checked ~ .plans .price .yearly {
+            display: inline;
+        }
+
+        .card ul {
+            list-style: none;
+            margin: 1rem 0;
+            padding: 0;
+        }
+
+        .card ul li {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .card ul li::before {
+            content: "✓";
+            color: hsl(var(--success));
+            font-weight: 700;
+        }
+
+        @media (max-width: 900px) {
+            .plans {
+                grid-template-columns: 1fr;
+            }
+            
+            .card-featured::before {
+                transform: translate(30%, -50%) rotate(45deg);
+            }
+        }
+
+        /* FAQ */
+        .faq {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        details {
+            border: 1px solid hsl(var(--border));
+            border-radius: var(--radius);
+            background: white;
+            padding: 1.25rem;
+            transition: all var(--transition);
+        }
+
+        details[open] {
+            border-color: hsl(var(--brand));
+            box-shadow: var(--shadow-sm);
+        }
+
+        summary {
+            cursor: pointer;
+            font-weight: 600;
+            font-size: var(--text-lg);
+            outline: none;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            list-style: none;
+        }
+
+        summary::after {
+            content: "+";
+            font-weight: 700;
+            font-size: 1.25rem;
+            margin-left: auto;
+            transition: transform 0.3s ease;
+        }
+
+        details[open] summary::after {
+            transform: rotate(45deg);
+        }
+
+        details p {
+            padding-top: 1rem;
+            padding-left: 1.75rem;
+            color: hsl(var(--text));
+        }
+
+        summary:focus-visible {
+            outline: 3px solid hsl(var(--ring));
+            border-radius: var(--radius);
+        }
+
+        /* Contact */
+        .contact-form {
+            border: 1px solid hsl(var(--border));
+            background: white;
+            border-radius: var(--radius);
+            padding: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .contact-form .grid {
+            display: grid;
+            gap: 1.5rem;
+            grid-template-columns: repeat(2, 1fr);
+            margin-bottom: 1rem;
+        }
+
+        .contact-form label {
+            display: grid;
+            gap: 0.5rem;
+            font-weight: 600;
+        }
+
+        .contact-form input,
+        .contact-form textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid hsl(var(--border));
+            border-radius: var(--radius);
+            font: inherit;
+            color: hsl(var(--text));
+            transition: all var(--transition);
+        }
+
+        .contact-form input:focus,
+        .contact-form textarea:focus {
+            border-color: hsl(var(--brand));
+            box-shadow: 0 0 0 3px hsla(var(--brand), 0.2);
+            outline: none;
+        }
+
+        .contact-form .full {
+            grid-column: 1 / -1;
+        }
+
+        .contact-form .actions {
+            margin-top: 1rem;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 900px) {
+            .contact-form .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Footer */
+        .site-footer {
+            padding: 3rem 0;
+            border-top: 1px solid hsl(var(--border));
+            background: linear-gradient(to bottom, hsl(var(--bg)), hsl(var(--surface)));
+        }
+
+        .footer-grid {
+            display: grid;
+            gap: 2rem;
+            align-items: center;
+            grid-template-columns: 1fr auto auto;
+        }
+
+        .footer-links {
+            list-style: none;
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: hsl(var(--text-weak));
+            text-decoration: none;
+            font-weight: 500;
+            transition: color var(--transition);
+        }
+
+        .footer-links a:hover {
+            color: hsl(var(--brand-strong));
+        }
+
+        .social {
+            display: flex;
+            gap: 1rem;
+            color: hsl(var(--text-weak));
+        }
+
+        .social a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: hsl(var(--surface));
+            color: hsl(var(--text-weak));
+            transition: all var(--transition);
+        }
+
+        .social a:hover {
+            background: hsl(var(--brand));
+            color: white;
+            transform: translateY(-3px);
+        }
+
+        .netlify-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: hsl(var(--surface));
+            border-radius: var(--radius);
+            padding: 0.5rem 1rem;
+            font-weight: 600;
+            color: hsl(var(--text));
+            text-decoration: none;
+            transition: all var(--transition);
+        }
+
+        .netlify-badge:hover {
+            background: hsl(var(--brand));
+            color: white;
+        }
+
+        .legal {
+            grid-column: 1 / -1;
+            color: hsl(var(--text-weak));
+            margin: 1rem 0 0;
+            font-size: 0.875rem;
+            text-align: center;
+            padding-top: 1rem;
+            border-top: 1px solid hsl(var(--border));
+        }
+
+        @media (max-width: 900px) {
+            .footer-grid {
+                grid-template-columns: 1fr;
+                justify-items: center;
+                text-align: center;
+            }
+            
+            .footer-links {
+                justify-content: center;
+            }
+        }
+
+        /* Focus states */
+        a:focus-visible,
+        button:focus-visible {
+            outline: 3px solid hsl(var(--ring));
+            outline-offset: 2px;
+            border-radius: var(--radius);
+        }
+
+        /* Utility classes */
+        .hero .actions .btn {
+            min-width: 160px;
+        }
+    </style>
+</head>
+<body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-header" role="banner">
+        <div class="container header-bar">
+            <a class="brand" href="#" aria-label="AI App Deployer Home">
+                <svg class="brand-mark" width="28" height="28" viewBox="0 0 24 24" aria-hidden="true">
+                    <defs>
+                        <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+                            <stop offset="0%" stop-color="hsl(var(--brand))"/>
+                            <stop offset="100%" stop-color="hsl(var(--brand-strong))"/>
+                        </linearGradient>
+                    </defs>
+                    <rect x="2" y="2" width="20" height="20" rx="5" fill="url(#g)"/>
+                    <path d="M8 15l2.5-6 2 4 1.5-2 2 4" stroke="white" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span class="brand-name">AI App Deployer</span>
+            </a>
+
+            <!-- Accessible CSS-only nav -->
+            <input type="checkbox" id="nav-toggle" class="nav-toggle" aria-label="Toggle navigation">
+            <label for="nav-toggle" class="hamburger" aria-controls="site-nav" aria-expanded="false">
+                <span></span><span></span><span></span>
+            </label>
+
+            <nav id="site-nav" class="site-nav" role="navigation" aria-label="Primary">
+                <ul>
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#demo">Demo</a></li>
+                    <li><a href="#pricing">Pricing</a></li>
+                    <li><a href="#docs">Docs/FAQ</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+                <div class="header-ctas">
+                    <a class="btn btn-outline" href="#login" aria-label="Login">Login</a>
+                    <a class="btn btn-primary" href="#deploy" aria-label="Deploy Now">Deploy Now</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main id="main">
+        <!-- Hero Section -->
+        <section class="hero" aria-labelledby="hero-title">
+            <div class="container hero-grid">
+                <div class="hero-copy">
+                    <h1 id="hero-title">Deploy AI Apps to Netlify — No JS Needed</h1>
+                    <p class="lead">
+                        A minimal, fast, and accessible front-end showing how AI apps can be deployed with a beautiful CSS‑only experience.
+                    </p>
+                    <div class="actions">
+                        <a class="btn btn-primary" href="#deploy">Deploy Now</a>
+                        <a class="btn btn-subtle" href="#features">Learn More</a>
+                    </div>
+                </div>
+                <figure class="hero-visual" aria-describedby="hero-figcaption">
+                    <svg viewBox="0 0 560 360" class="hero-svg" role="img" aria-label="Illustration of app deployment workflow">
+                        <defs>
+                            <linearGradient id="bg" x1="0" x2="0" y1="0" y2="1">
+                                <stop offset="0%" stop-color="hsl(var(--surface))"/>
+                                <stop offset="100%" stop-color="hsl(var(--surface-2))"/>
+                            </linearGradient>
+                        </defs>
+                        <rect width="560" height="360" rx="16" fill="url(#bg)"/>
+                        <g transform="translate(40,50)">
+                            <rect width="160" height="90" rx="10" fill="hsl(var(--brand)/.1)" stroke="hsl(var(--brand))"/>
+                            <text x="80" y="55" text-anchor="middle" font-size="16" fill="hsl(var(--text-strong))">Your Repo</text>
+                        </g>
+                        <g transform="translate(360,50)">
+                            <rect width="160" height="90" rx="10" fill="hsl(var(--brand)/.1)" stroke="hsl(var(--brand))"/>
+                            <text x="80" y="55" text-anchor="middle" font-size="16" fill="hsl(var(--text-strong))">Netlify</text>
+                        </g>
+                        <path d="M200 95h150" stroke="hsl(var(--brand))" stroke-width="3" marker-end="url(#arrow)"/>
+                        <defs><marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="hsl(var(--brand))"/></marker></defs>
+                        <rect x="140" y="210" width="280" height="24" rx="12" fill="hsl(var(--border))"/>
+                        <rect x="140" y="210" width="180" height="24" rx="12" fill="hsl(var(--brand))"/>
+                    </svg>
+                    <figcaption id="hero-figcaption" class="visually-hidden">Illustration of app deployment workflow</figcaption>
+                </figure>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section id="features" class="section">
+            <div class="container">
+                <h2 class="section-title">Key Features</h2>
+                <div class="features-grid">
+                    <article class="feature">
+                        <h3>CSS-Only Interactions</h3>
+                        <p>No JavaScript required: toggles, accordions, and demos powered by pure CSS.</p>
+                    </article>
+                    <article class="feature">
+                        <h3>Accessible by Default</h3>
+                        <p>Semantic HTML, labeled controls, high contrast, and visible focus states.</p>
+                    </article>
+                    <article class="feature">
+                        <h3>Fast & Lightweight</h3>
+                        <p>Mobile-first CSS with custom properties for easy theming and performance.</p>
+                    </article>
+                    <article class="feature">
+                        <h3>Netlify Ready</h3>
+                        <p>Drop-in deployment and optional Netlify Forms support.</p>
+                    </article>
+                    <article class="feature">
+                        <h3>Responsive Layout</h3>
+                        <p>Beautiful on phones, tablets, and desktops with fluid grids.</p>
+                    </article>
+                    <article class="feature">
+                        <h3>SEO-Friendly</h3>
+                        <p>Descriptive titles, meta tags, and structured FAQ data included.</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- Demo Section -->
+        <section id="demo" class="section">
+            <div class="container">
+                <h2 class="section-title">Demo: Deploy Flow</h2>
+                <form class="demo-panel" aria-labelledby="demo-title">
+                    <fieldset>
+                        <legend id="demo-title" class="visually-hidden">Choose a step to preview</legend>
+                        <input type="radio" name="step" id="step-1" checked class="visually-hidden">
+                        <input type="radio" name="step" id="step-2" class="visually-hidden">
+                        <input type="radio" name="step" id="step-3" class="visually-hidden">
+                        
+                        <div class="step-select">
+                            <label for="step-1">Connect Repo</label>
+                            <label for="step-2">Build</label>
+                            <label for="step-3">Deploy</label>
+                        </div>
+                        
+                        <div class="progress" aria-hidden="true">
+                            <span class="bar" data-step="1"></span>
+                            <span class="bar" data-step="2"></span>
+                            <span class="bar" data-step="3"></span>
+                        </div>
+                        
+                        <div class="panes">
+                            <div class="pane pane-1">
+                                <p>Authorize and connect your Git provider. Detect build settings automatically.</p>
+                            </div>
+                            <div class="pane pane-2">
+                                <p>Build kicks off with optimized caching and parallelization.</p>
+                            </div>
+                            <div class="pane pane-3">
+                                <p>Deploy to a global CDN with instant rollbacks and previews.</p>
+                            </div>
+                        </div>
+                    </fieldset>
+                </form>
+            </div>
+        </section>
+
+        <!-- Pricing Section -->
+        <section id="pricing" class="section">
+            <div class="container">
+                <input type="checkbox" id="billing" class="visually-hidden">
+                <div class="pricing-head">
+                    <h2 class="section-title">Plans</h2>
+                    <div class="billing-toggle">
+                        <label for="billing" class="toggle-label">
+                            <span>Monthly</span>
+                            <span class="switch" aria-hidden="true"></span>
+                            <span>Yearly <strong class="save">Save 15%</strong></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="plans">
+                    <article class="card">
+                        <h3>Starter</h3>
+                        <p class="price">
+                            <span class="monthly" aria-hidden="false">$9</span>
+                            <span class="yearly">$7</span>
+                            <span class="cycle">/mo</span>
+                        </p>
+                        <ul>
+                            <li>1 project</li>
+                            <li>Basic builds</li>
+                            <li>Email support</li>
+                            <li>Community forum access</li>
+                        </ul>
+                        <a href="#deploy" class="btn btn-outline">Choose Starter</a>
+                    </article>
+                    <article class="card card-featured" aria-label="Recommended plan">
+                        <h3>Pro</h3>
+                        <p class="price">
+                            <span class="monthly">$29</span>
+                            <span class="yearly">$25</span>
+                            <span class="cycle">/mo</span>
+                        </p>
+                        <ul>
+                            <li>Unlimited projects</li>
+                            <li>Optimized builds</li>
+                            <li>Priority support</li>
+                            <li>Advanced analytics</li>
+                            <li>Custom domains</li>
+                        </ul>
+                        <a href="#deploy" class="btn btn-primary">Choose Pro</a>
+                    </article>
+                    <article class="card">
+                        <h3>Team</h3>
+                        <p class="price">
+                            <span class="monthly">$99</span>
+                            <span class="yearly">$85</span>
+                            <span class="cycle">/mo</span>
+                        </p>
+                        <ul>
+                            <li>Team members</li>
+                            <li>Role-based access</li>
+                            <li>SLAs</li>
+                            <li>Enterprise security</li>
+                            <li>Dedicated account manager</li>
+                        </ul>
+                        <a href="#deploy" class="btn btn-outline">Choose Team</a>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ Section -->
+        <section id="docs" class="section">
+            <div class="container">
+                <h2 class="section-title">Docs & FAQ</h2>
+                <div class="faq">
+                    <details>
+                        <summary>How do I deploy without JavaScript?</summary>
+                        <p>All interactions on this site are CSS-only. Your app can still use JS—this demo simply shows the front-end can be minimal.</p>
+                    </details>
+                    <details>
+                        <summary>Can I customize the theme?</summary>
+                        <p>Yes. Adjust CSS custom properties in the :root block to change colors, radii, spacing, and typography.</p>
+                    </details>
+                    <details>
+                        <summary>Is this production-ready?</summary>
+                        <p>Yes. It’s responsive, accessible, and optimized. Replace placeholder copy and assets with your own.</p>
+                    </details>
+                    <details>
+                        <summary>How do I connect my repository?</summary>
+                        <p>Simply authorize your Git provider (GitHub, GitLab, Bitbucket) and we'll automatically detect your project settings.</p>
+                    </details>
+                    <details>
+                        <summary>What AI frameworks are supported?</summary>
+                        <p>We support all major frameworks including TensorFlow, PyTorch, Hugging Face, and OpenAI APIs.</p>
+                    </details>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="section">
+            <div class="container">
+                <h2 class="section-title">Contact / Request Demo</h2>
+                <form name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field" class="contact-form">
+                    <input type="hidden" name="form-name" value="contact">
+                    <p class="visually-hidden">
+                        <label>Don’t fill this out if you’re human: <input name="bot-field"></label>
+                    </p>
+                    <div class="grid">
+                        <label>
+                            <span>Name</span>
+                            <input type="text" name="name" autocomplete="name" required>
+                        </label>
+                        <label>
+                            <span>Email</span>
+                            <input type="email" name="email" autocomplete="email" required>
+                        </label>
+                    </div>
+                    <label class="full">
+                        <span>Company</span>
+                        <input type="text" name="company" autocomplete="organization">
+                    </label>
+                    <label class="full">
+                        <span>Message</span>
+                        <textarea name="message" rows="5" required></textarea>
+                    </label>
+                    <div class="actions">
+                        <button type="submit" class="btn btn-primary">Send Message</button>
+                        <a href="#learn" class="btn btn-subtle">More Information</a>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer" role="contentinfo">
+        <div class="container footer-grid">
+            <a class="brand" href="#" aria-label="AI App Deployer">
+                <svg class="brand-mark" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="2" y="2" width="20" height="20" rx="5" fill="hsl(var(--brand))"/>
+                    <path d="M8 15l2.5-6 2 4 1.5-2 2 4" stroke="white" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span class="brand-name">AI App Deployer</span>
+            </a>
+
+            <nav aria-label="Footer">
+                <ul class="footer-links">
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#demo">Demo</a></li>
+                    <li><a href="#pricing">Pricing</a></li>
+                    <li><a href="#docs">Docs</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                    <li><a href="#">Privacy</a></li>
+                    <li><a href="#">Terms</a></li>
+                </ul>
+            </nav>
+
+            <div class="social">
+                <a href="#" aria-label="GitHub">
+                    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 .5a12 12 0 0 0-3.79 23.4c.6.1.82-.26.82-.58v-2.1c-3.34.73-4.04-1.61-4.04-1.61-.55-1.42-1.34-1.8-1.34-1.8-1.1-.76.08-.75.08-.75 1.22.09 1.86 1.26 1.86 1.26 1.08 1.86 2.83 1.32 3.52 1.01.11-.79.42-1.32.76-1.62-2.66-.31-5.46-1.33-5.46-5.91 0-1.31.47-2.38 1.25-3.22-.12-.31-.54-1.56.12-3.26 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 6.01 0c2.29-1.55 3.3-1.23 3.3-1.23.66 1.7.24 2.95.12 3.26.78.84 1.25 1.91 1.25 3.22 0 4.59-2.8 5.6-5.47 5.9.43.37.81 1.1.81 2.21v3.28c0 .32.21.69.82.57A12 12 0 0 0 12 .5z"/></svg>
+                </a>
+                <a href="#" aria-label="X">
+                    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M17.5 3h3.2l-7 8.01L22 21h-6.9l-5.4-6.4L3.6 21H.4l7.5-8.6L2 3h7l4.9 5.7L17.5 3z"/></svg>
+                </a>
+                <a href="#" aria-label="LinkedIn">
+                    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M4.98 3.5C4.98 4.88 3.86 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM0 23.5h5V7.5H0v16zM8 7.5v16h5v-8.4c0-2.3 3-2.5 3 0v8.4h5V14.2c0-6.1-6.5-5.9-8-2.9V7.5H8z"/></svg>
+                </a>
+            </div>
+
+            <a href="https://www.netlify.com/" class="netlify-badge" aria-label="Deploys by Netlify">
+                <span>Deploys by Netlify</span>
+            </a>
+
+            <p class="legal">© 2025 AI App Deployer. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- FAQ structured data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {"@type": "Question","name": "How do I deploy without JavaScript?","acceptedAnswer": {"@type": "Answer","text": "This demo uses CSS-only interactions to avoid JS in the front-end."}},
+            {"@type": "Question","name": "Can I customize the theme?","acceptedAnswer": {"@type": "Answer","text": "Yes. Edit CSS custom properties in :root."}},
+            {"@type": "Question","name": "Is this production-ready?","acceptedAnswer": {"@type": "Answer","text": "Yes. Replace placeholders and deploy to Netlify."}}
+        ]
+    }
+    </script>
+</body>
+</html>
