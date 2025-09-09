@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - AI App Deployer</title>
+    <meta name="description" content="Your AI App Deployer dashboard">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .dashboard-header {
+            background: linear-gradient(135deg, hsl(var(--brand), 0.1) 0%, transparent 100%);
+            border-bottom: 1px solid hsl(var(--border));
+            padding: 1.5rem 0;
+        }
+        
+        .dashboard-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: hsl(var(--brand));
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: white;
+            border: 1px solid hsl(var(--border));
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .stat-card h3 {
+            font-size: var(--text-base);
+            color: hsl(var(--text-weak));
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-value {
+            font-size: var(--text-3xl);
+            font-weight: 800;
+            color: hsl(var(--text-strong));
+        }
+        
+        .stat-change {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+        
+        .stat-change.positive {
+            color: hsl(var(--success));
+        }
+        
+        .stat-change.negative {
+            color: hsl(var(--error));
+        }
+        
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .project-card {
+            background: white;
+            border: 1px solid hsl(var(--border));
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            transition: all var(--transition);
+        }
+        
+        .project-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow);
+        }
+        
+        .project-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+        
+        .project-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .status-live {
+            background: hsla(var(--success), 0.1);
+            color: hsl(var(--success));
+        }
+        
+        .status-building {
+            background: hsla(var(--brand), 0.1);
+            color: hsl(var(--brand));
+        }
+        
+        .status-failed {
+            background: hsla(var(--error), 0.1);
+            color: hsl(var(--error));
+        }
+        
+        .project-meta {
+            display: flex;
+            gap: 1rem;
+            color: hsl(var(--text-weak));
+            font-size: 0.875rem;
+            margin: 1rem 0;
+        }
+        
+        .project-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        .btn-sm {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+        }
+        
+        .deploy-now-card {
+            background: linear-gradient(135deg, hsl(var(--brand), 0.05) 0%, transparent 100%);
+            border: 2px dashed hsl(var(--brand));
+            border-radius: var(--radius);
+            padding: 2rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px;
+        }
+        
+        .deploy-now-card h3 {
+            margin-bottom: 1rem;
+        }
+        
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        
+        .quick-action {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1.5rem;
+            background: white;
+            border: 1px solid hsl(var(--border));
+            border-radius: var(--radius);
+            text-decoration: none;
+            color: hsl(var(--text));
+            transition: all var(--transition);
+        }
+        
+        .quick-action:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow);
+            color: hsl(var(--brand));
+        }
+        
+        .quick-action svg {
+            width: 32px;
+            height: 32px;
+            margin-bottom: 1rem;
+            color: hsl(var(--brand));
+        }
+    </style>
+</head>
+<body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-header dashboard-header" role="banner">
+        <div class="container dashboard-nav">
+            <a class="brand" href="index.html" aria-label="AI App Deployer Home">
+                <svg class="brand-mark" width="28" height="28" viewBox="0 0 24 24" aria-hidden="true">
+                    <defs>
+                        <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+                            <stop offset="0%" stop-color="hsl(var(--brand))"/>
+                            <stop offset="100%" stop-color="hsl(var(--brand-strong))"/>
+                        </linearGradient>
+                    </defs>
+                    <rect x="2" y="2" width="20" height="20" rx="5" fill="url(#g)"/>
+                    <path d="M8 15l2.5-6 2 4 1.5-2 2 4" stroke="white" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span class="brand-name">AI App Deployer</span>
+            </a>
+
+            <nav class="user-menu">
+                <a href="index.html#deploy" class="btn btn-primary">New Project</a>
+                <div class="user-avatar" id="userAvatar">U</div>
+                <button class="btn btn-subtle" id="logoutBtn">Logout</button>
+            </nav>
+        </div>
+    </header>
+
+    <main id="main" class="section">
+        <div class="container">
+            <h1 class="section-title">Dashboard</h1>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Active Projects</h3>
+                    <div class="stat-value">12</div>
+                    <div class="stat-change positive">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="18 15 12 9 6 15"></polyline>
+                        </svg>
+                        +2 from last month
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <h3>Deployments This Month</h3>
+                    <div class="stat-value">47</div>
+                    <div class="stat-change positive">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="18 15 12 9 6 15"></polyline>
+                        </svg>
+                        +12 from last month
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <h3>Bandwidth Used</h3>
+                    <div class="stat-value">124GB</div>
+                    <div class="stat-change">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        Same as last month
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <h3>Success Rate</h3>
+                    <div class="stat-value">98.7%</div>
+                    <div class="stat-change positive">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="18 15 12 9 6 15"></polyline>
+                        </svg>
+                        +0.5% from last month
+                    </div>
+                </div>
+            </div>
+            
+            <h2 class="section-title">Recent Projects</h2>
+            
+            <div class="projects-grid">
+                <div class="project-card">
+                    <div class="project-header">
+                        <h3>Customer Chatbot</h3>
+                        <span class="project-status status-live">Live</span>
+                    </div>
+                    <p>AI-powered customer support chatbot using GPT-4</p>
+                    <div class="project-meta">
+                        <span>Last deployed: 2 days ago</span>
+                    </div>
+                    <div class="project-actions">
+                        <a href="#" class="btn btn-primary btn-sm">View</a>
+                        <a href="#" class="btn btn-outline btn-sm">Settings</a>
+                    </div>
+                </div>
+                
+                <div class="project-card">
+                    <div class="project-header">
+                        <h3>Image Generator</h3>
+                        <span class="project-status status-building">Building</span>
+                    </div>
+                    <p>DALL-E based image generation app</p>
+                    <div class="project-meta">
+                        <span>Deploying now</span>
+                    </div>
+                    <div class="project-actions">
+                        <button class="btn btn-subtle btn-sm" disabled>View Logs</button>
+                    </div>
+                </div>
+                
+                <div class="project-card">
+                    <div class="project-header">
+                        <h3>Sentiment Analysis</h3>
+                        <span class="project-status status-live">Live</span>
+                    </div>
+                    <p>Real-time sentiment analysis for social media</p>
+                    <div class="project-meta">
+                        <span>Last deployed: 1 week ago</span>
+                    </div>
+                    <div class="project-actions">
+                        <a href="#" class="btn btn-primary btn-sm">View</a>
+                        <a href="#" class="btn btn-outline btn-sm">Settings</a>
+                    </div>
+                </div>
+                
+                <div class="deploy-now-card">
+                    <h3>Ready to deploy a new project?</h3>
+                    <p>Get started with our simple deployment process</p>
+                    <a href="index.html#deploy" class="btn btn-primary" style="margin-top: 1rem;">Deploy Now</a>
+                </div>
+            </div>
+            
+            <h2 class="section-title">Quick Actions</h2>
+            
+            <div class="quick-actions">
+                <a href="#" class="quick-action">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 5v14M5 12h14"/>
+                    </svg>
+                    <span>New Project</span>
+                </a>
+                
+                <a href="#" class="quick-action">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    <span>Support</span>
+                </a>
+                
+                <a href="#" class="quick-action">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    </svg>
+                    <span>Documentation</span>
+                </a>
+                
+                <a href="#" class="quick-action">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                    </svg>
+                    <span>Settings</span>
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <footer class="site-footer" role="contentinfo">
+        <div class="container footer-grid">
+            <a class="brand" href="index.html" aria-label="AI App Deployer">
+                <svg class="brand-mark" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="2" y="2" width="20" height="20" rx="5" fill="hsl(var(--brand))"/>
+                    <path d="M8 15l2.5-6 2 4 1.5-2 2 4" stroke="white" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span class="brand-name">AI App Deployer</span>
+            </a>
+
+            <nav aria-label="Footer">
+                <ul class="footer-links">
+                    <li><a href="index.html#features">Features</a></li>
+                    <li><a href="index.html#demo">Demo</a></li>
+                    <li><a href="index.html#pricing">Pricing</a></li>
+                    <li><a href="index.html#docs">Docs</a></li>
+                    <li><a href="index.html#contact">Contact</a></li>
+                    <li><a href="#">Privacy</a></li>
+                    <li><a href="#">Terms</a></li>
+                </ul>
+            </nav>
+
+            <div class="social">
+                <a href="#" aria-label="GitHub">
+                    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 .5a12 12 0 0 0-3.79 23.4c.6.1.82-.26.82-.58v-2.1c-3.34.73-4.04-1.61-4.04-1.61-.55-1.42-1.34-1.8-1.34-1.8-1.1-.76.08-.75.08-.75 1.22.09 1.86 1.26 1.86 1.26 1.08 1.86 2.83 1.32 3.52 1.01.11-.79.42-1.32.76-1.62-2.66-.31-5.46-1.33-5.46-5.91 0-1.31.47-2.38 1.25-3.22-.12-.31-.54-1.56.12-3.26 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 6.01 0c2.29-1.55 3.3-1.23 3.30-1.23.66 1.7.24 2.95.12 3.26.78.84 1.25 1.91 1.25 3.22 0 4.59-2.80 5.60-5.47 5.90.43.37.81 1.10.81 2.21v3.28c0 .32.21.69.82.57A12 12 0 0 0 12 .5z"/></svg>
+                </a>
+                <a href="#" aria-label="X">
+                    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M17.5 3h3.2l-7 8.01L22 21h-6.9l-5.4-6.4L3.6 21H.4l7.5-8.6L2 3h7l4.9 5.7L17.5 3z"/></svg>
+                </a>
+                <a href="#" aria-label="LinkedIn">
+                    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M4.98 3.5C4.98 4.88 3.86 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM0 23.5h5V7.5H0v16zM8 7.5v16h5v-8.4c0-2.3 3-2.5 3 0v8.4h5V14.2c0-6.1-6.5-5.9-8-2.9V7.5H8z"/></svg>
+                </a>
+            </div>
+
+            <a href="https://www.netlify.com/" class="netlify-badge" aria-label="Deploys by Netlify">
+                <span>Deploys by Netlify</span>
+            </a>
+
+            <p class="legal">© 2025 AI App Deployer. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="auth.js"></script>
+    <script>
+        // Check if user is logged in
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof Auth !== 'undefined' && !Auth.isLoggedIn()) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // Set user avatar initial
+            const userEmail = localStorage.getItem('userEmail') || 'U';
+            document.getElementById('userAvatar').textContent = userEmail.charAt(0).toUpperCase();
+            
+            // Logout functionality
+            document.getElementById('logoutBtn').addEventListener('click', function() {
+                if (typeof Auth !== 'undefined') {
+                    Auth.logout();
+                } else {
+                    localStorage.removeItem('isLoggedIn');
+                    localStorage.removeItem('userEmail');
+                }
+                window.location.href = 'index.html';
+            });
+        });
+    </script>
+</body>
+</html>
